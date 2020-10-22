@@ -4,7 +4,13 @@
     <div class="content">
       <todo-input @todoAdded="addNew"></todo-input>
       <todo-list>
-        <todo-item v-for="item in items" :key="item.id" :item="item" @itemCheck="itemCheck">  </todo-item>
+        <todo-item 
+          v-for="item in items" :key="item.id" 
+          :item="item" 
+          @updateTodo="updateTodo"
+          @deleteTodo="deleteTodo"
+          @itemCheck="itemCheck" 
+          />
       </todo-list>
     </div>
     <div class="space"></div>
@@ -63,6 +69,18 @@ export default {
             return {...item,completed : !item.completed};
           }
           return item;
+        })
+      },
+      deleteTodo(Id) {
+       this.items = this.items.filter(item => item.id !== Id);
+      },
+      updateTodo(todo) {
+        this.items = this.items.map(item => {
+          if(item.id == todo.id){
+            return {
+              ...todo
+            } 
+          } return item;
         })
       }
     },
