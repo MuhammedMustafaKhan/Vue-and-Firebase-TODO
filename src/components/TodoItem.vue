@@ -28,8 +28,8 @@ export default {
           this.editMode = !this.editMode;
       },
       updateTodo() {
-          this.$emit('updateTodo', this.todo)
-          this.editMode = false
+        this.$emit('updateTodo', this.todo)
+        this.editMode = false
       }
   },
 }

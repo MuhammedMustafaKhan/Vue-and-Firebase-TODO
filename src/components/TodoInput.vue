@@ -13,8 +13,8 @@ export default {
   },
   methods: {
       addTodo() {
-          this.$emit('todoAdded', this.todo);
-          this.todo = ''
+        this.$emit('todoAdded', this.todo);
+        this.todo = ''
       }
   },
 }

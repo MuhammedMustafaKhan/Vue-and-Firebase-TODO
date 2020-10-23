@@ -21,6 +21,7 @@
 import TodoInput from './components/TodoInput.vue';
 import TodoList from './components/TodoList.vue';
 import TodoItem from './components/TodoItem.vue';
+import firebase from 'firebase';
 export default {
   components: {
     TodoInput,
@@ -29,20 +30,30 @@ export default {
   },
   data () {
     return {
-      items: [
-        {
-          id: 1,
-          todo: "Learning Vue.js",
-          completed: false
-        },
-        {
-          id: 2,
-          todo: "Buildning Todo App",
-          completed: true
-        }
-      ]
+      items: []
      
     }
+  },
+  mounted() {
+    this.db.collection('todos').onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        if(change.type == 'added'){
+          this.items.push({
+            id: change.doc.id,
+            ...change.doc.data(),
+          })
+        }else if(change.type == 'removed') {
+          this.items = this.items.filter(item => item.id !== change.doc.id)
+        }else if(change.type == 'modified') {
+          this.items = this.items.map(item => {
+            if(item.id == change.doc.id){
+              return {...change.doc.data(), id: item.id}
+            }
+            return item;
+          })
+        }
+      })
+    })
   },
   computed: {
     itemLength(){
@@ -53,15 +64,19 @@ export default {
         return this.items[this.itemLength - 1].id + 1;
       }
       return 1; 
+    },
+    db() {
+      return firebase.firestore();
     }
   },
   methods: {
       addNew(todo) {
-        this.items.push({
-          id: this.getId,
+        let todoItem = {
           todo,
           completed: false,
-        })
+        }
+        this.db.collection('todos').add(todoItem);
+        
       },
       itemCheck(Id) {
         this.items = this.items.map( item => {
@@ -72,16 +87,10 @@ export default {
         })
       },
       deleteTodo(Id) {
-       this.items = this.items.filter(item => item.id !== Id);
+       this.db.collection('todos').doc(Id).delete();
       },
       updateTodo(todo) {
-        this.items = this.items.map(item => {
-          if(item.id == todo.id){
-            return {
-              ...todo
-            } 
-          } return item;
-        })
+        this.db.collection('todos').doc(todo.id).update(todo)
       }
     },
 }
@@ -95,3 +104,5 @@ export default {
     background-color: rgb(230, 230, 230);
   }
 </style>
+
+
